@@ -24,9 +24,14 @@
             margin-bottom: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
+        .search-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
         #search-input {
+            flex-grow: 1;
             padding: 8px;
-            width: 70%;
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 1em;
@@ -43,9 +48,19 @@
         #search-btn:hover {
             background-color: #0052a3;
         }
+        /* 新增：排序選單樣式 */
+        #sort-select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            background-color: white;
+        }
         /* 互動標籤按鈕樣式 */
         .tags-container {
             margin-top: 12px;
+            border-top: 1px dashed #eee;
+            padding-top: 10px;
         }
         .tag-btn {
             display: inline-block;
@@ -111,12 +126,24 @@
 
     <h1>🔬 生醫文獻篩選器 (MVP v0)</h1>
     
-    <!-- 控制篩選與關鍵字輸入的區塊 -->
+    <!-- 控制篩選、關鍵字輸入與排序的區塊 -->
     <div class="filter-controls">
-        <input type="text" id="search-input" placeholder="輸入研究問題、標題或摘要關鍵字...">
-        <button id="search-btn">搜尋</button>
+        <div class="search-row">
+            <input type="text" id="search-input" placeholder="輸入研究問題、標題或摘要關鍵字...">
+            <button id="search-btn">搜尋</button>
+            
+            <!-- 新增排序選單（驗收條件 2） -->
+            <select id="sort-select">
+                <option value="relevance-desc">依相關度：高到低</option>
+                <option value="relevance-asc">依相關度：低到高</option>
+                <option value="date-desc">依出版日期：新到舊</option>
+                <option value="date-asc">依出版日期：舊到新</option>
+                <option value="title-asc">依論文名稱：A - Z</option>
+            </select>
+        </div>
+
         <div class="tags-container" id="tags-filter-container">
-            <!-- 標籤按鈕會由 app.js 動態生成 -->
+            <!-- 標籤按鈕由 app.js 動態生成 -->
         </div>
     </div>
 
