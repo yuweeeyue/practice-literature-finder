@@ -111,26 +111,76 @@ const PAPERS_MOCK = [
         url: "https://www.nature.com/ng"
     }
 ];
-// ==================== 渲染邏輯 (IPO) ====================
 
-/**
- * 函式說明：將論文資料渲染到網頁上
- * Input (輸入)：papersArray (論文陣列) [3]
- */
+// ==================== 狀態管理 (State) ====================
+let currentKeyword = ""; // 儲存使用者輸入的關鍵字
+let selectedTag = null;  // 儲存目前選取的單一標籤（null 代表未選取，顯示全部）
+
+// ==================== 渲染與處理邏輯 (IPO) ====================
+
+// 1. 動態生成不重複的標籤按鈕
+function renderTagButtons() {
+    const tagsContainer = document.getElementById("tags-filter-container");
+    
+    // 提取所有論文中出現過的標籤，並利用 Set 去除重複
+    const allTags = new Set();
+    PAPERS_MOCK.forEach(paper => {
+        paper.tags.forEach(tag => allTags.add(tag));
+    });
+
+    // 生成「全部清除」按鈕 + 各個標籤按鈕
+    let tagsHtml = `<button class="tag-btn ${selectedTag === null ? 'active' : ''}" onclick="selectTag(null)">顯示全部</button>`;
+    
+    allTags.forEach(tag => {
+        const isActive = selectedTag === tag ? 'active' : '';
+        tagsHtml += `<button class="tag-btn ${isActive}" onclick="selectTag('${tag}')">${tag}</button>`;
+    });
+
+    tagsContainer.innerHTML = tagsHtml;
+}
+
+// 2. 切換選取標籤的行為
+function selectTag(tag) {
+    selectedTag = tag;
+    renderTagButtons(); // 重新渲染按鈕狀態
+    filterAndRender();  // 執行篩選
+}
+
+// 3. 核心過濾與渲染控制
+function filterAndRender() {
+    // Input：從 PAPERS_MOCK 開始篩選
+    let filtered = PAPERS_MOCK;
+
+    // Process A：關鍵字篩選（不分大小寫，同時比對標題、作者與摘要）
+    if (currentKeyword.trim() !== "") {
+        const query = currentKeyword.toLowerCase().trim();
+        filtered = filtered.filter(paper => {
+            return paper.title.toLowerCase().includes(query) || 
+                   paper.authors.toLowerCase().includes(query) || 
+                   paper.summary.toLowerCase().includes(query);
+        });
+    }
+
+    // Process B：標籤篩選
+    if (selectedTag !== null) {
+        filtered = filtered.filter(paper => paper.tags.includes(selectedTag));
+    }
+
+    // Output：將最後篩選結果渲染到畫面上
+    renderPapers(filtered);
+}
+
+// 4. 基礎論文渲染（支援無結果顯示）
 function renderPapers(papersArray) {
-    // 1. Process：取得 HTML 中的顯示容器 [3]
     const container = document.getElementById("papers-container");
     
-    // 如果傳入的資料為空，顯示「找不到符合條件的結果」（符合驗收條件 6）
     if (papersArray.length === 0) {
-        container.innerHTML = `<p style="color: #999; text-align: center;">找不到符合條件的結果</p>`;
+        container.innerHTML = `<p style="color: #999; text-align: center; padding: 40px;">找不到符合 "${currentKeyword}" 且標籤為 "${selectedTag || '全部'}" 的結果</p>`;
         return;
     }
 
-    // 2. Process：將每筆資料轉換成 HTML 卡片字串 [3]
     let htmlContent = "";
     papersArray.forEach(paper => {
-        // 將標籤陣列轉為 HTML 標籤
         const tagsHtml = paper.tags.map(tag => `<span class="tag">${tag}</span>`).join("");
 
         htmlContent += `
@@ -150,13 +200,26 @@ function renderPapers(papersArray) {
         `;
     });
 
-    // 3. Output (輸出)：將 HTML 字串寫入瀏覽器畫面 [3]
     container.innerHTML = htmlContent;
 }
 
-// ==================== 啟動執行 ====================
-
-// 網頁載入時，預設先顯示出所有的論文（執行驗收條件 3 基礎）
+// ==================== 事件監聽註冊 ====================
 document.addEventListener("DOMContentLoaded", () => {
-    renderPapers(PAPERS_MOCK);
+    // 初始化畫面
+    renderTagButtons();
+    filterAndRender();
+
+    // 監聽搜尋按鈕點擊事件（驗收條件 1）
+    document.getElementById("search-btn").addEventListener("click", () => {
+        currentKeyword = document.getElementById("search-input").value;
+        filterAndRender();
+    });
+
+    // 監聽輸入框的 Enter 鍵事件（優化操作體驗）
+    document.getElementById("search-input").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            currentKeyword = document.getElementById("search-input").value;
+            filterAndRender();
+        }
+    });
 });
