@@ -1,0 +1,145 @@
+[
+    {
+        "id": 1,
+        "title": "CRISPR-Cas9 Gene Editing Efficiency in Human Cells",
+        "authors": "Jennifer A. Doudna, Emmanuel Charpentier",
+        "publishDate": "2023-05-12",
+        "journal": "Nature Biotechnology",
+        "summary": "This study evaluates the targeting efficiency and off-target effects of CRISPR-Cas9 system.",
+        "relevanceScore": 95,
+        "tags": [
+            "CRISPR",
+            "Gene Editing"
+        ],
+        "url": "https://www.nature.com/nbt"
+    },
+    {
+        "id": 2,
+        "title": "Deep Learning for Automated Cancer Histopathology Classification",
+        "authors": "Andrew Ng, Fei-Fei Li",
+        "publishDate": "2024-01-15",
+        "journal": "IEEE Transactions on Medical Imaging",
+        "summary": "An end-to-end convolutional neural network (CNN) designed to classify breast cancer histopathological images.",
+        "relevanceScore": 70,
+        "tags": [
+            "AI",
+            "Cancer",
+            "Deep Learning"
+        ],
+        "url": "https://ieeexplore.ieee.org"
+    },
+    {
+        "id": 3,
+        "title": "Single-Cell RNA-Seq Reveals Immune Microenvironment in Lung Cancer",
+        "authors": "Sarah Teichmann",
+        "publishDate": "2022-11-30",
+        "journal": "Cell",
+        "summary": "Profiling over 50,000 single cells to map the cellular landscape in lung cancer.",
+        "relevanceScore": 85,
+        "tags": [
+            "Single-Cell",
+            "Bioinformatics",
+            "Cancer"
+        ],
+        "url": "https://www.cell.com"
+    },
+    {
+        "id": 4,
+        "title": "mRNA Vaccine Delivery Systems: Lipid Nanoparticles Optimization",
+        "authors": "Robert Langer, Katalin Karikó",
+        "publishDate": "2023-08-22",
+        "journal": "Advanced Materials",
+        "summary": "Systematic screening of novel ionizable lipids to enhance mRNA delivery.",
+        "relevanceScore": 88,
+        "tags": [
+            "mRNA",
+            "Vaccine"
+        ],
+        "url": "https://onlinelibrary.wiley.com"
+    },
+    {
+        "id": 5,
+        "title": "Machine Learning in Virtual Screening for Drug Discovery",
+        "authors": "Demis Hassabis",
+        "publishDate": "2024-03-05",
+        "journal": "Journal of Medicinal Chemistry",
+        "summary": "Integrating deep generative models to speed up drug discovery.",
+        "relevanceScore": 92,
+        "tags": [
+            "AI",
+            "Drug Discovery"
+        ],
+        "url": "https://pubs.acs.org"
+    },
+    {
+        "id": 6,
+        "title": "Clinical Efficacy of CAR-T Cell Therapy in B-Cell Lymphoma",
+        "authors": "Carl June",
+        "publishDate": "2021-06-18",
+        "journal": "New England Journal of Medicine",
+        "summary": "Long-term follow-up results demonstrating durable complete responses.",
+        "relevanceScore": 78,
+        "tags": [
+            "CAR-T",
+            "Cancer"
+        ],
+        "url": "https://www.nejm.org"
+    },
+    {
+        "id": 7,
+        "title": "AlphaFold 3: Predicting Biomolecular Structures and Interactions",
+        "authors": "John Jumper, Demis Hassabis",
+        "publishDate": "2024-05-10",
+        "journal": "Nature",
+        "summary": "Predicting 3D structures and chemical modifications of proteins, DNA, and RNA.",
+        "relevanceScore": 98,
+        "tags": [
+            "AI",
+            "AlphaFold",
+            "Protein Structure"
+        ],
+        "url": "https://www.nature.com"
+    },
+    {
+        "id": 8,
+        "title": "Applications of CRISPR in Agricultural Genetic Engineering",
+        "authors": "Feng Zhang",
+        "publishDate": "2022-04-02",
+        "journal": "Plant Physiology",
+        "summary": "Reviewing how CRISPR technology is utilized to create disease-resistant crop varieties.",
+        "relevanceScore": 80,
+        "tags": [
+            "CRISPR",
+            "Agriculture"
+        ],
+        "url": "https://academic.oup.com/plphys"
+    },
+    {
+        "id": 9,
+        "title": "AI-Driven Interpretation of Electrocardiograms in Emergency Care",
+        "authors": "Eric Topol",
+        "publishDate": "2023-10-14",
+        "journal": "The Lancet",
+        "summary": "Testing an AI algorithm's ability to alert clinicians to acute myocardial infarction in real-time.",
+        "relevanceScore": 72,
+        "tags": [
+            "AI",
+            "Clinical Medicine"
+        ],
+        "url": "https://www.thelancet.com"
+    },
+    {
+        "id": 10,
+        "title": "The Landscape of Somatic Mutations in Human Cancers",
+        "authors": "Mike Stratton",
+        "publishDate": "2020-02-05",
+        "journal": "Nature Genetics",
+        "summary": "A comprehensive analysis of cancer genomes across 38 tumor types.",
+        "relevanceScore": 65,
+        "tags": [
+            "Cancer",
+            "Genomics"
+        ],
+        "url": "https://www.nature.com/ng"
+    }
+]
