@@ -7,8 +7,8 @@ let currentSort = "relevance-desc"; // 預設排序條件
 // ==================== 數據載入 (Input - Fetch) ====================
 async function loadPapersData() {
     try {
-        // 使用 fetch 動態讀取本機的 papers.json 檔案
-        const response = await fetch("papers.json");
+        // 唯一修改點：將 "papers.json" 改為 Flask 後端 API 網址
+        const response = await fetch("http://127.0.0.1:5000/api/papers");
         if (!response.ok) {
             throw new Error(`HTTP 錯誤！狀態碼: ${response.status}`);
         }
@@ -21,7 +21,7 @@ async function loadPapersData() {
         console.error("無法讀取文獻資料庫:", error);
         document.getElementById("papers-container").innerHTML = `
             <p style="color: red; text-align: center; padding: 40px;">
-                資料加載失敗：請確認您是透過本機伺服器（localhost）開啟此網頁，而非直接雙擊開啟 HTML 檔案。
+                資料加載失敗：請確認您已啟動後端 API 伺服器 (port 5000)，且是透過本機伺服器 (port 8000) 開啟網頁。
             </p>
         `;
     }
