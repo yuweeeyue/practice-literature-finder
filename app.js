@@ -7,8 +7,8 @@ let currentSort = "relevance-desc"; // 預設排序條件
 // ==================== 數據載入 (Input - Fetch) ====================
 async function loadPapersData() {
     try {
-        // 唯一修改點：將 "papers.json" 改為 Flask 後端 API 網址
-        const response = await fetch("http://127.0.0.1:5000/api/papers");
+        // 將 "papers.json" 修改為 Flask 後端 API 網址
+const response = await fetch("http://127.0.0.1:5000/api/papers");
         if (!response.ok) {
             throw new Error(`HTTP 錯誤！狀態碼: ${response.status}`);
         }
