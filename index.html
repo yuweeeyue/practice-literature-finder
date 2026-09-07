@@ -141,7 +141,27 @@
                 <option value="title-asc">依論文名稱：A - Z</option>
             </select>
         </div>
-
+<!-- 新增文獻表單區塊 -->
+<div class="form-container" style="background: #fdfdfd; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+    <h3 style="margin-top: 0; color: #2d3748; border-bottom: 2px solid #edf2f7; padding-bottom: 8px;">新增文獻至數據庫</h3>
+    <form id="add-paper-form">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px;">
+            <input type="text" id="form-title" placeholder="文獻標題 (必填)" required style="padding: 8px; border: 1px solid #cbd5e0; border-radius: 4px;">
+            <input type="text" id="form-authors" placeholder="作者 (例如: Jennifer A. Doudna)" style="padding: 8px; border: 1px solid #cbd5e0; border-radius: 4px;">
+            <input type="text" id="form-journal" placeholder="期刊 (例如: Nature)" style="padding: 8px; border: 1px solid #cbd5e0; border-radius: 4px;">
+            <input type="date" id="form-date" style="padding: 8px; border: 1px solid #cbd5e0; border-radius: 4px;">
+            <input type="number" id="form-score" placeholder="相關度評分 (1-100)" min="1" max="100" style="padding: 8px; border: 1px solid #cbd5e0; border-radius: 4px;">
+            <input type="text" id="form-tags" placeholder="標籤 (多個標籤請用分號 ; 分隔)" style="padding: 8px; border: 1px solid #cbd5e0; border-radius: 4px;">
+        </div>
+        <div style="margin-bottom: 12px;">
+            <input type="url" id="form-url" placeholder="文獻來源網址 (https://...)" style="width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #cbd5e0; border-radius: 4px;">
+        </div>
+        <div style="margin-bottom: 12px;">
+            <textarea id="form-summary" placeholder="文獻摘要內容..." rows="3" style="width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #cbd5e0; border-radius: 4px; resize: vertical;"></textarea>
+        </div>
+        <button type="submit" style="background: #3182ce; color: white; border: none; padding: 10px 24px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.2s;">提交儲存</button>
+    </form>
+</div>
         <div class="tags-container" id="tags-filter-container">
             <!-- 標籤按鈕由 app.js 動態生成 -->
         </div>
