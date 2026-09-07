@@ -121,6 +121,34 @@ def add_paper():
     finally:
         if conn:
             conn.close()
+
+@app.route("/api/papers/<int:paper_id>", methods=["DELETE", "OPTIONS"])
+def delete_paper(paper_id):
+    # 1. 優先處理 CORS 預檢請求：若收到 OPTIONS 請求，直接回傳 200 OK 釋放通道
+    if request.method == "OPTIONS":
+        return jsonify({"success": True}), 200
+        
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 2. 檢查資料是否存在
+        cursor.execute("SELECT id FROM papers WHERE id = ?", (paper_id,))
+        if not cursor.fetchone():
+            return jsonify({"error": "資料不存在或已被刪除"}), 404
+            
+        # 3. 執行參數化刪除
+        cursor.execute("DELETE FROM papers WHERE id = ?", (paper_id,))
+        conn.commit()
+        
+        return jsonify({"message": f"文獻 ID {paper_id} 刪除成功"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"伺服器內部錯誤: {str(e)}"}), 500
+    finally:
+        if conn:
+            conn.close()
 if __name__ == "__main__":
     # 預設執行在 http://127.0.0.1:5000
     # 若 5000 埠口被佔用，可手動修改 port=5001
