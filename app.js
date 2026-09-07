@@ -149,3 +149,70 @@ document.addEventListener("DOMContentLoaded", () => {
         filterAndRender();
     });
 });
+document.addEventListener("DOMContentLoaded", () => {
+    // ... 原有的 DOM 載入與監聽代碼 ...
+
+    // 註冊表單提交事件監聽器
+    const addForm = document.getElementById("add-paper-form");
+    if (addForm) {
+        addForm.addEventListener("submit", handleAddPaper);
+    }
+});
+// ==================== 新增文獻處理 (Create - POST) ====================
+async function handleAddPaper(event) {
+    event.preventDefault(); // 1. 攔截預設表單提交，防止網頁重新整理
+
+    // 2. Input: 蒐集表單輸入值
+    const title = document.getElementById("form-title").value.trim();
+    const authors = document.getElementById("form-authors").value.trim();
+    const journal = document.getElementById("form-journal").value.trim();
+    const publishDate = document.getElementById("form-date").value;
+    const relevanceScore = document.getElementById("form-score").value;
+    const summary = document.getElementById("form-summary").value.trim();
+    const url = document.getElementById("form-url").value.trim();
+    
+    // 解析標籤字串為陣列
+    const tagsInput = document.getElementById("form-tags").value.trim();
+    const tags = tagsInput ? tagsInput.split(";").map(t => t.trim()).filter(t => t !== "") : [];
+
+    // 建立請求酬載 (Payload)
+    const requestBody = {
+        title,
+        authors,
+        journal,
+        publishDate: publishDate || new Date().toISOString().split('T')[ 0 ], // 若未填則預設今日
+        relevanceScore: relevanceScore ? parseInt(relevanceScore) : 70,
+        summary,
+        tags,
+        url: url || "#"
+    };
+
+    // 3. Process: 發送 POST 請求至 Flask API
+    try {
+        const response = await fetch("http://127.0.0.1:5000/api/papers", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `HTTP 錯誤！狀態碼: ${response.status}`);
+        }
+
+        const newPaper = await response.json();
+
+        // 4. Output: 更新前端 State 並驅動管道渲染，表單重設歸零
+        ALL_PAPERS.push(newPaper);
+        filterAndRender(); // 呼叫統一過濾與排序管線，網頁不重新整理，新卡片立即在前端呈顯
+
+        event.target.reset(); // 重置表單欄位
+        alert("✓ 文獻新增成功，已同步寫入 SQLite 資料庫！");
+
+    } catch (error) {
+        console.error("新增文獻時發生錯誤:", error);
+        alert(`新增失敗: ${error.message}`);
+    }
+}
