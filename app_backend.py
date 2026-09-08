@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sqlite3
+import os
 
 app = Flask(__name__)
 # 啟用 CORS 允許前端網頁（通常在 port 8000）跨網域請求此 API（port 5000）
@@ -9,9 +10,9 @@ CORS(app)
 DB_FILE = "papers.db"
 
 def get_db_connection():
-    """建立資料庫連線，並設定 row_factory 讓查詢結果可以直接轉成字典格式"""
-    conn = sqlite3.connect(DB_FILE)
-    # 這行是關鍵：預設 sqlite3 回傳 tuple，設定這行後會回傳類似 dict 的 Row 物件
+    # 優先讀取環境變數中的資料庫路徑，若無則預設為 "papers.db"
+    db_path = os.environ.get("DATABASE_PATH", "papers.db")
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -150,6 +151,6 @@ def delete_paper(paper_id):
         if conn:
             conn.close()
 if __name__ == "__main__":
-    # 預設執行在 http://127.0.0.1:5000
-    # 若 5000 埠口被佔用，可手動修改 port=5001
-    app.run(debug=True, port=5000)
+    # 讀取環境變數中的 PORT，並轉為整數，預設為 5000
+    server_port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, port=server_port)
