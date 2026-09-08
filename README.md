@@ -52,3 +52,4 @@ python app_backend.py
 預設將啟動於：http://127.0.0.1:5000
 5. 啟動前端網頁
 你可以使用 VS Code 的 Live Server 套件開啟 index.html，或直接雙擊檔案於瀏覽器中執行。
+# 「1. 併發限制：SQLite 在高併發寫入時可能產生鎖定，限制了大規模寫入效能，未來若有高併發需求，將遷移至 PostgreSQL。」
