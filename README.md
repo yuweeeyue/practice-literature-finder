@@ -52,3 +52,4 @@ python app_backend.py
 預設將啟動於：http://127.0.0.1:5000
 5. 啟動前端網頁
 你可以使用 VS Code 的 Live Server 套件開啟 index.html，或直接雙擊檔案於瀏覽器中執行。
+# 「1. 併發限制：當前 SQLite 資料庫不適合多用戶同時寫入，若用戶數增長，建議遷移至更強大的資料庫。」
