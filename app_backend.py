@@ -21,6 +21,26 @@ CORS(app, resources={
 DB_FILE = "papers.db"
 
 def get_db_connection():
+    def init_db():
+     """確保 SQLite 資料庫與 papers 資料表在系統啟動時已自動建立"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS papers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            authors TEXT,
+            abstract TEXT,
+            relevance_score REAL,
+            tags TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+# 在應用程式載入時立即執行資料庫初始化
+init_db()
     # 優先讀取環境變數中的資料庫路徑，若無則預設為 "papers.db"
     db_path = os.environ.get("DATABASE_PATH", "papers.db")
     conn = sqlite3.connect(db_path)
