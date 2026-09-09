@@ -162,6 +162,11 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
     // ... 原有的 DOM 載入與監聽代碼 ...
 // 範例：新增文獻表單送出事件
+const paperForm = document.getElementById('paper-form');
+paperForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    // ... 原本的新增邏輯 ...
+});
 document.getElementById('paper-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
