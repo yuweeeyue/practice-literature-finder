@@ -202,7 +202,7 @@ document.getElementById('paper-form').addEventListener('submit', async (e) => {
     }
 });
     // 註冊表單提交事件監聽器
-    const addForm = document.getElementById("add-paper-form");
+    const addForm = document.getElementById("paper-form");
     if (addForm) {
         addForm.addEventListener("submit", handleAddPaper);
     }
