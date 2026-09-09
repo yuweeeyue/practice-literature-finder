@@ -28,7 +28,7 @@ async function loadPapers() {
 }
 
 /**
- * 渲染文獻資料至網頁 DOM
+ * 渲染文獻資料至網頁 DOM (包含刪除按鈕)
  */
 function renderPapers(papers) {
     const paperList = document.getElementById('paper-list');
@@ -44,19 +44,33 @@ function renderPapers(papers) {
             <h3>${escapeHtml(paper.title)}</h3>
             <p><strong>作者：</strong>${escapeHtml(paper.authors || '未提供')}</p>
             <p><strong>摘要：</strong>${escapeHtml(paper.abstract || '無摘要')}</p>
+            <button class="btn-delete" onclick="deletePaper(${paper.id})">刪除</button>
         </div>
     `).join('');
 }
 
 /**
- * HTML 字元轉義防範 XSS 攻擊
+ * 3. 發送刪除文獻請求 (DELETE)
  */
-function escapeHtml(str) {
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+async function deletePaper(paperId) {
+    if (!confirm('確定要刪除這筆文獻紀錄嗎？')) return;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/papers/${paperId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert('刪除成功！');
+            loadPapers(); // 重新整理清單
+        } else {
+            const errData = await response.json();
+            alert('刪除失敗: ' + (errData.error || '伺服器回應錯誤'));
+        }
+    } catch (error) {
+        console.error('刪除文獻時發生錯誤:', error);
+        alert('刪除失敗: 無法連線至伺服器');
+    }
 }
 
 /**

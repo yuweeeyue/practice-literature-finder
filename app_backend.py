@@ -68,6 +68,23 @@ def add_paper():
         return jsonify({"message": "Paper created successfully", "id": new_id}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    # 3. 刪除文獻資料 (DELETE)
+@app.route("/api/papers/<int:paper_id>", methods=["DELETE"])
+def delete_paper(paper_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM papers WHERE id = ?", (paper_id,))
+        conn.commit()
+        deleted_rows = cursor.rowcount
+        conn.close()
+
+        if deleted_rows == 0:
+            return jsonify({"error": "Paper not found"}), 404
+
+        return jsonify({"message": "Paper deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     
         # 安全處理評分 (防範非整數型態資料傳入)
         try:
