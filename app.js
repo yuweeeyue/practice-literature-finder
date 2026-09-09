@@ -1,7 +1,8 @@
 // 根據當前網域自動切換 API 基礎網址
 const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://127.0.0.1:5000'
-    : 'https://literature-finder-backend.onrender.com'; // 預留：雲端部署後的後端網址
+    : 'https://practice-literature-finder.onrender.com';
+ // 預留：雲端部署後的後端網址
 // ==================== 狀態管理 (State) ====================
 let ALL_PAPERS = [];            // 用來存放從 json 讀取進來的完整資料
 let currentKeyword = "";        // 儲存目前輸入的關鍵字
