@@ -1,7 +1,5 @@
-// 根據當前網域自動切換 API 基礎網址
-const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://127.0.0.1:5000'
-    : 'https://practice-literature-finder.onrender.com';
+// 直接連線至已上線的 Render 雲端後端
+const API_BASE_URL = 'https://practice-literature-finder.onrender.com';
  // 預留：雲端部署後的後端網址
 // ==================== 狀態管理 (State) ====================
 let ALL_PAPERS = [];            // 用來存放從 json 讀取進來的完整資料
@@ -163,7 +161,43 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 document.addEventListener("DOMContentLoaded", () => {
     // ... 原有的 DOM 載入與監聽代碼 ...
+// 範例：新增文獻表單送出事件
+document.getElementById('paper-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
+    // 1. 讀取表單輸入值
+    const titleInput = document.getElementById('title');
+    const authorsInput = document.getElementById('authors');
+    const abstractInput = document.getElementById('abstract');
+
+    // 2. 打包成 payload 物件（關鍵：必須先宣告變數）
+    const payload = {
+        title: titleInput.value,
+        authors: authorsInput ? authorsInput.value : '',
+        abstract: abstractInput ? abstractInput.value : ''
+    };
+
+    try {
+        // 3. 發送請求至雲端 API
+        const response = await fetch(`${API_BASE_URL}/api/papers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            alert('新增成功！');
+            titleInput.value = ''; // 清空表單
+            loadPapers();         // 重新讀取清單
+        } else {
+            const errData = await response.json();
+            alert('新增失敗: ' + (errData.error || '未知錯誤'));
+        }
+    } catch (error) {
+        console.error('新增失敗:', error);
+        alert('新增失敗: ' + error.message);
+    }
+});
     // 註冊表單提交事件監聽器
     const addForm = document.getElementById("add-paper-form");
     if (addForm) {
