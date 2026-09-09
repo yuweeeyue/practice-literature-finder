@@ -6,28 +6,15 @@ import os
 app = Flask(__name__)
 # 從環境變數讀取前端允許網域，本機開發時提供預設備用網址
 frontend_url = os.environ.get("FRONTEND_URL", "*")
-
-CORS(app, resources={
-    r"/api/*": {
-        "origins": [
-            frontend_url,
-            "http://127.0.0.1:5500",  # Live Server 預設埠號
-            "http://localhost:5500",
-            "http://127.0.0.1:5000"
-        ]
-    }
-})
-
-DB_FILE = "papers.db"
+CORS(app, resources={r"/api/*": {"origins": [frontend_url, "http://127.0.0.1:5500", "http://localhost:5500", "http://127.0.0.1:5000"]}})
 
 def get_db_connection():
-    """單純負責建立並回傳資料庫連線（絕對不要在此呼叫 init_db）"""
     db_path = os.environ.get("DATABASE_PATH", "papers.db")
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
+
 def init_db():
-    """單向呼叫 get_db_connection() 建立資料表"""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
@@ -44,15 +31,10 @@ def init_db():
     conn.commit()
     conn.close()
 
-    # 在應用程式載入時立即執行資料庫初始化
-    init_db()
-    # 優先讀取環境變數中的資料庫路徑，若無則預設為 "papers.db"
-    db_path = os.environ.get("DATABASE_PATH", "papers.db")
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    return conn
+# 啟動時自動初始化資料庫
+init_db()
 
-# 定義 API 路由路徑
+# 1. 讀取文獻清單 (GET)
 @app.route("/api/papers", methods=["GET"])
 def get_papers():
     try:
@@ -60,47 +42,33 @@ def get_papers():
         papers = conn.execute("SELECT * FROM papers ORDER BY created_at DESC").fetchall()
         conn.close()
         return jsonify([dict(row) for row in papers]), 200
-    except sqlite3.OperationalError as e:
-        # 防禦性機制：若遇到 table 不存在錯誤，自動建表並重試
+    except Exception as e:
         if "no such table" in str(e):
             init_db()
-            conn = get_db_connection()
-            papers = conn.execute("SELECT * FROM papers ORDER BY created_at DESC").fetchall()
-            conn.close()
-            return jsonify([dict(row) for row in papers]), 200
+            return jsonify([]), 200
         return jsonify({"error": str(e)}), 500
 
-    except Exception as e:
-        # 異常處理：若發生錯誤回傳 500 錯誤狀態碼
-        return jsonify({"error": str(e)}), 500
-        
-    finally:
-        if conn:
-            conn.close()
+# 2. 新增文獻資料 (POST)
 @app.route("/api/papers", methods=["POST"])
 def add_paper():
-    conn = None
+    data = request.get_json()
+    if not data or not data.get("title", "").strip():
+        return jsonify({"error": "Title is required"}), 400
+
     try:
-        # 1. Input: 接收前端傳入的 JSON 資料
-        data = request.get_json()
-        if not data:
-            return jsonify({"error": "請求格式錯誤，必須提供 JSON 資料"}), 400
-        
-        title = data.get("title", "").strip()
-        authors = data.get("authors", "").strip()
-        journal = data.get("journal", "").strip()
-        publish_date = data.get("publishDate", "").strip()
-        summary = data.get("summary", "").strip()
-        url = data.get("url", "").strip()
-        
-        # 2. Process: 後端防禦性資料驗證 (Defensive Validation)
-        if not title:
-            return jsonify({"error": "資料驗證失敗：文獻標題不可為空"}), 400
-            
-        # 轉換標籤陣列 -> 以分號分隔的字串，以符合 SQLite 欄位設計
-        tags_list = data.get("tags", [])
-        tags_str = ";".join([tag.strip() for tag in tags_list if tag.strip()])
-        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO papers (title, authors, abstract) VALUES (?, ?, ?)",
+            (data.get("title").strip(), data.get("authors", ""), data.get("abstract", ""))
+        )
+        conn.commit()
+        new_id = cursor.lastrowid
+        conn.close()
+        return jsonify({"message": "Paper created successfully", "id": new_id}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
         # 安全處理評分 (防範非整數型態資料傳入)
         try:
             relevance_score = int(data.get("relevanceScore", 70))
@@ -170,6 +138,5 @@ def delete_paper(paper_id):
         if conn:
             conn.close()
 if __name__ == "__main__":
-    # 讀取環境變數中的 PORT，並轉為整數，預設為 5000
-    server_port = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, port=server_port)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
