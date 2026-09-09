@@ -202,66 +202,54 @@ document.getElementById('paper-form').addEventListener('submit', async (e) => {
     }
 });
     // 註冊表單提交事件監聽器
-    const addForm = document.getElementById("paper-form");
-    if (addForm) {
-        addForm.addEventListener("submit", handleAddPaper);
-    }
-});
-// ==================== 新增文獻處理 (Create - POST) ====================
-async function handleAddPaper(event) {
-    event.preventDefault(); // 1. 攔截預設表單提交，防止網頁重新整理
+    // 監聽表單送出事件
+const paperForm = document.getElementById('paper-form');
 
-    // 2. Input: 蒐集表單輸入值
-    const title = document.getElementById("form-title").value.trim();
-    const authors = document.getElementById("form-authors").value.trim();
-    const journal = document.getElementById("form-journal").value.trim();
-    const publishDate = document.getElementById("form-date").value;
-    const relevanceScore = document.getElementById("form-score").value;
-    const summary = document.getElementById("form-summary").value.trim();
-    const url = document.getElementById("form-url").value.trim();
-    
-    // 解析標籤字串為陣列
-    const tagsInput = document.getElementById("form-tags").value.trim();
-    const tags = tagsInput ? tagsInput.split(";").map(t => t.trim()).filter(t => t !== "") : [];
+if (paperForm) {
+    paperForm.addEventListener('submit', async (e) => {
+        e.preventDefault(); // 1. 阻止頁面原生重新整理
 
-    // 建立請求酬載 (Payload)
-    const requestBody = {
-        title,
-        authors,
-        journal,
-        publishDate: publishDate || new Date().toISOString().split('T')[ 0 ], // 若未填則預設今日
-        relevanceScore: relevanceScore ? parseInt(relevanceScore) : 70,
-        summary,
-        tags,
-        url: url || "#"
-    };
+        // 2. 取得 DOM 欄位元素
+        const titleEl = document.getElementById('title');
+        const authorsEl = document.getElementById('authors');
+        const abstractEl = document.getElementById('abstract');
 
-    // 3. Process: 發送 POST 請求至 Flask API
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/papers`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-});
+        // 3. 定義並打包 payload 物件 (必須在 fetch 之前宣告)
+        const payload = {
+            title: titleEl ? titleEl.value.trim() : '',
+            authors: authorsEl ? authorsEl.value.trim() : '',
+            abstract: abstractEl ? abstractEl.value.trim() : ''
+        };
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `HTTP 錯誤！狀態碼: ${response.status}`);
+        // 基本欄位驗證
+        if (!payload.title) {
+            alert('請輸入文獻標題！');
+            return;
         }
 
-        const newPaper = await response.json();
+        try {
+            // 4. 發送 POST 請求至 Render 雲端後端
+            const response = await fetch(`${API_BASE_URL}/api/papers`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload) // 5. 存取已定義好的 payload
+            });
 
-        // 4. Output: 更新前端 State 並驅動管道渲染，表單重設歸零
-        ALL_PAPERS.push(newPaper);
-        filterAndRender(); // 呼叫統一過濾與排序管線，網頁不重新整理，新卡片立即在前端呈顯
-
-        event.target.reset(); // 重置表單欄位
-        alert("✓ 文獻新增成功，已同步寫入 SQLite 資料庫！");
-
-    } catch (error) {
-        console.error("新增文獻時發生錯誤:", error);
-        alert(`新增失敗: ${error.message}`);
-    }
+            if (response.ok) {
+                alert('文獻新增成功！');
+                paperForm.reset(); // 清空表單
+                loadPapers();      // 重新讀取並渲染清單
+            } else {
+                const err = await response.json();
+                alert('新增失敗: ' + (err.error || '伺服器回應錯誤'));
+            }
+        } catch (error) {
+            console.error('網絡或伺服器錯誤:', error);
+            alert('新增失敗: 無法連線至伺服器');
+        }
+    });
 }
 // ==================== 刪除文獻處理 (Delete - DELETE) ====================
 async function handleDeletePaper(id) {
