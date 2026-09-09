@@ -28,6 +28,41 @@ async function loadPapers() {
 }
 
 /**
+ * HTML 字元轉義防範 XSS 攻擊
+ */
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+/**
+ * 渲染文獻資料至網頁 DOM (包含刪除按鈕)
+ */
+function renderPapers(papers) {
+    const paperList = document.getElementById('paper-list');
+    if (!paperList) return;
+
+    if (papers.length === 0) {
+        paperList.innerHTML = '<p>目前尚無文獻紀錄。</p>';
+        return;
+    }
+
+    paperList.innerHTML = papers.map(paper => `
+        <div class="paper-card">
+            <h3>${escapeHtml(paper.title)}</h3>
+            <p><strong>作者：</strong>${escapeHtml(paper.authors || '未提供')}</p>
+            <p><strong>摘要：</strong>${escapeHtml(paper.abstract || '無摘要')}</p>
+            <button class="btn-delete" onclick="deletePaper(${paper.id})">刪除</button>
+        </div>
+    `).join('');
+}
+
+/**
  * 渲染文獻資料至網頁 DOM (包含刪除按鈕)
  */
 function renderPapers(papers) {
