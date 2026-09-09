@@ -176,11 +176,9 @@ document.getElementById('paper-form').addEventListener('submit', async (e) => {
     const abstractInput = document.getElementById('abstract');
 
     // 2. 打包成 payload 物件（關鍵：必須先宣告變數）
-    const payload = {
-        title: titleInput.value,
-        authors: authorsInput ? authorsInput.value : '',
-        abstract: abstractInput ? abstractInput.value : ''
-    };
+    const titleEl = document.getElementById('title');
+    const authorsEl = document.getElementById('authors');
+    const abstractEl = document.getElementById('abstract');
 
     try {
         // 3. 發送請求至雲端 API
