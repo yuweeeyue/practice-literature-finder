@@ -4,8 +4,19 @@ import sqlite3
 import os
 
 app = Flask(__name__)
-# 啟用 CORS 允許前端網頁（通常在 port 8000）跨網域請求此 API（port 5000）
-CORS(app)
+# 從環境變數讀取前端允許網域，本機開發時提供預設備用網址
+frontend_url = os.environ.get("FRONTEND_URL", "*")
+
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            frontend_url,
+            "http://127.0.0.1:5500",  # Live Server 預設埠號
+            "http://localhost:5500",
+            "http://127.0.0.1:5000"
+        ]
+    }
+})
 
 DB_FILE = "papers.db"
 

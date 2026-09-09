@@ -1,3 +1,7 @@
+// 根據當前網域自動切換 API 基礎網址
+const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://127.0.0.1:5000'
+    : 'https://literature-finder-backend.onrender.com'; // 預留：雲端部署後的後端網址
 // ==================== 狀態管理 (State) ====================
 let ALL_PAPERS = [];            // 用來存放從 json 讀取進來的完整資料
 let currentKeyword = "";        // 儲存目前輸入的關鍵字
@@ -8,7 +12,7 @@ let currentSort = "relevance-desc"; // 預設排序條件
 async function loadPapersData() {
     try {
         // 將 "papers.json" 修改為 Flask 後端 API 網址
-const response = await fetch("http://localhost:5000/api/papers");
+const response = await fetch(`${API_BASE_URL}/api/papers`);
         if (!response.ok) {
             throw new Error(`HTTP 錯誤！狀態碼: ${response.status}`);
         }
@@ -196,13 +200,11 @@ async function handleAddPaper(event) {
 
     // 3. Process: 發送 POST 請求至 Flask API
     try {
-        const response = await fetch("http://127.0.0.1:5000/api/papers", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(requestBody)
-        });
+        const response = await fetch(`${API_BASE_URL}/api/papers`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+});
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -231,8 +233,8 @@ async function handleDeletePaper(id) {
 
     // 2. Process: 發送 DELETE 請求至 Flask API
     try {
-       const response = await fetch(`http://localhost:5000/api/papers/${id}`, {
-    method: "DELETE"
+       const response = await fetch(`${API_BASE_URL}/api/papers/${id}`, {
+    method: 'DELETE'
 });
         if (!response.ok) {
             const errorData = await response.json();
