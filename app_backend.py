@@ -55,37 +55,20 @@ def init_db():
 # 定義 API 路由路徑
 @app.route("/api/papers", methods=["GET"])
 def get_papers():
-    conn = None
     try:
-        # 1. Input: 接收請求並建立資料庫連線
         conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        # 2. Process: 執行 SQL 查詢撈取所有文獻
-        cursor.execute("SELECT * FROM papers")
-        rows = cursor.fetchall()
-        
-        # 將 Row 物件轉換成 Python 的 List of Dicts
-        papers_list = []
-        for row in rows:
-            # 轉換 tags 字串回到 list 格式以契合前端原有的渲染邏輯
-            tags_str = row["tags"]
-            tags_list = [tag.strip() for tag in tags_str.split(";")] if tags_str else []
-            
-            papers_list.append({
-                "id": row["id"],
-                "title": row["title"],
-                "authors": row["authors"],
-                "publishDate": row["publish_date"],
-                "journal": row["journal"],
-                "summary": row["summary"],
-                "relevanceScore": row["relevance_score"],
-                "tags": tags_list,
-                "url": row["url"]
-            })
-            
-        # 3. Output: 回傳標準 JSON 格式與 HTTP 200 狀態碼
-        return jsonify(papers_list), 200
+        papers = conn.execute("SELECT * FROM papers ORDER BY created_at DESC").fetchall()
+        conn.close()
+        return jsonify([dict(row) for row in papers]), 200
+    except sqlite3.OperationalError as e:
+        # 防禦性機制：若遇到 table 不存在錯誤，自動建表並重試
+        if "no such table" in str(e):
+            init_db()
+            conn = get_db_connection()
+            papers = conn.execute("SELECT * FROM papers ORDER BY created_at DESC").fetchall()
+            conn.close()
+            return jsonify([dict(row) for row in papers]), 200
+        return jsonify({"error": str(e)}), 500
 
     except Exception as e:
         # 異常處理：若發生錯誤回傳 500 錯誤狀態碼
