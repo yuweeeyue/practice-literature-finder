@@ -1,24 +1,21 @@
-const API_BASE_URL = 'https://practice-literature-finder.onrender.com';
+const API_BASE_URL = 'http://127.0.0.1:5000'; // 本機測試，若部署 Render 改為網域網址
 
 document.addEventListener('DOMContentLoaded', () => {
     loadPapers();
     setupFormListener();
+    setupAIAnalyzeListener();
 });
 
 async function loadPapers() {
     const paperList = document.getElementById('paper-list');
     try {
         const response = await fetch(`${API_BASE_URL}/api/papers`);
-        if (!response.ok) {
-            throw new Error(`HTTP 錯誤狀態碼：${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP 狀態碼：${response.status}`);
         const papers = await response.json();
         renderPapers(papers);
     } catch (error) {
         console.error('載入文獻失敗:', error);
-        if (paperList) {
-            paperList.innerHTML = `<p class="error-msg">資料加載失敗，請確認 API 伺服器正常運作。</p>`;
-        }
+        if (paperList) paperList.innerHTML = `<p style="color: red;">資料加載失敗，請確認後端服務已啟動。</p>`;
     }
 }
 
@@ -32,9 +29,6 @@ function escapeHtml(str) {
         .replace(/'/g, '&#039;');
 }
 
-/**
- * 渲染 6 大目標項目的文獻卡片
- */
 function renderPapers(papers) {
     const paperList = document.getElementById('paper-list');
     if (!paperList) return;
@@ -50,14 +44,14 @@ function renderPapers(papers) {
             : '未評分';
 
         return `
-            <div class="paper-card" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
+            <div class="paper-card">
                 <h3>1. 論文名稱：${escapeHtml(paper.title)}</h3>
                 <p><strong>2. 作者：</strong>${escapeHtml(paper.authors || '未提供')}</p>
                 <p><strong>3. 出版刊物：</strong>${escapeHtml(paper.journal || '未提供')}</p>
                 <p><strong>4. 發布日期：</strong>${escapeHtml(paper.pub_date || '未提供')}</p>
-                <p><strong>5. (AI判斷)相關度評分：</strong><span class="score-badge" style="color: #2b74c7; font-weight: bold;">${escapeHtml(scoreDisplay)}</span></p>
+                <p><strong>5. (AI判斷)相關度評分：</strong><span style="color: #28a745; font-weight: bold;">${escapeHtml(scoreDisplay)}</span></p>
                 <p><strong>6. 研究相關內容 / 摘要：</strong></p>
-                <blockquote style="background: #f9f9f9; padding: 10px; border-left: 3px solid #2b74c7; margin: 5px 0;">
+                <blockquote style="background: #f8f9fa; padding: 10px; border-left: 4px solid #007bff; margin: 5px 0;">
                     ${escapeHtml(paper.abstract || '無摘要內文')}
                 </blockquote>
                 <button class="btn-delete" onclick="deletePaper(${paper.id})">刪除文獻</button>
@@ -73,36 +67,20 @@ function setupFormListener() {
     paperForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const titleEl = document.getElementById('title');
-        const authorsEl = document.getElementById('authors');
-        const journalEl = document.getElementById('journal');
-        const pubDateEl = document.getElementById('pub_date');
-        const scoreEl = document.getElementById('relevance_score');
-        const abstractEl = document.getElementById('abstract');
-
-        const rawScore = scoreEl ? scoreEl.value.trim() : '';
-
-        // 完整打包 6 項對應數據
+        const rawScore = document.getElementById('relevance_score').value.trim();
         const payload = {
-            title: titleEl ? titleEl.value.trim() : '',
-            authors: authorsEl ? authorsEl.value.trim() : '',
-            journal: journalEl ? journalEl.value.trim() : '',
-            pub_date: pubDateEl ? pubDateEl.value : '',
+            title: document.getElementById('title').value.trim(),
+            authors: document.getElementById('authors').value.trim(),
+            journal: document.getElementById('journal').value.trim(),
+            pub_date: document.getElementById('pub_date').value,
             relevance_score: rawScore !== '' ? parseFloat(rawScore) : null,
-            abstract: abstractEl ? abstractEl.value.trim() : ''
+            abstract: document.getElementById('abstract').value.trim()
         };
-
-        if (!payload.title) {
-            alert('請輸入論文名稱！');
-            return;
-        }
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/papers`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
 
@@ -115,8 +93,54 @@ function setupFormListener() {
                 alert('新增失敗: ' + (errData.error || '伺服器回應錯誤'));
             }
         } catch (error) {
-            console.error('新增文獻時發生錯誤:', error);
             alert('新增失敗: 無法連線至伺服器');
+        }
+    });
+}
+
+function setupAIAnalyzeListener() {
+    const aiBtn = document.getElementById('btn-ai-analyze');
+    const loadingStatus = document.getElementById('ai-loading-status');
+
+    if (!aiBtn) return;
+
+    aiBtn.addEventListener('click', async () => {
+        const title = document.getElementById('title').value.trim();
+        const abstract = document.getElementById('abstract').value.trim();
+
+        if (!title) {
+            alert('請先輸入「論文名稱」再進行 AI 分析！');
+            return;
+        }
+
+        aiBtn.disabled = true;
+        if (loadingStatus) loadingStatus.style.display = 'inline';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/papers/analyze`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, abstract })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                if (data.relevance_score !== undefined) {
+                    document.getElementById('relevance_score').value = data.relevance_score;
+                }
+                if (data.ai_summary) {
+                    document.getElementById('abstract').value = data.ai_summary;
+                }
+                alert('AI 分析完成！已自動填入相關度評分與摘要。');
+            } else {
+                alert('AI 分析失敗: ' + (data.error || '未知錯誤'));
+            }
+        } catch (error) {
+            alert('分析失敗: 無法連線至伺服器');
+        } finally {
+            aiBtn.disabled = false;
+            if (loadingStatus) loadingStatus.style.display = 'none';
         }
     });
 }
@@ -125,19 +149,14 @@ async function deletePaper(paperId) {
     if (!confirm('確定要刪除這筆文獻紀錄嗎？')) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/papers/${paperId}`, {
-            method: 'DELETE'
-        });
-
+        const response = await fetch(`${API_BASE_URL}/api/papers/${paperId}`, { method: 'DELETE' });
         if (response.ok) {
             alert('刪除成功！');
             loadPapers();
         } else {
-            const errData = await response.json();
-            alert('刪除失敗: ' + (errData.error || '伺服器回應錯誤'));
+            alert('刪除失敗');
         }
     } catch (error) {
-        console.error('刪除文獻時發生錯誤:', error);
         alert('刪除失敗: 無法連線至伺服器');
     }
 }
