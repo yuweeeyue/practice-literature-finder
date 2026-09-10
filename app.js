@@ -41,7 +41,7 @@ function escapeHtml(str) {
 }
 
 /**
- * 渲染文獻資料至網頁 DOM (包含刪除按鈕)
+ * 渲染文獻資料至網頁 DOM (含完整詳細資訊與刪除按鈕)
  */
 function renderPapers(papers) {
     const paperList = document.getElementById('paper-list');
@@ -57,6 +57,7 @@ function renderPapers(papers) {
             <h3>${escapeHtml(paper.title)}</h3>
             <p><strong>作者：</strong>${escapeHtml(paper.authors || '未提供')}</p>
             <p><strong>摘要：</strong>${escapeHtml(paper.abstract || '無摘要')}</p>
+            <p><small class="text-muted"><strong>新增時間：</strong>${escapeHtml(paper.created_at || '未知')}</small></p>
             <button class="btn-delete" onclick="deletePaper(${paper.id})">刪除</button>
         </div>
     `).join('');
