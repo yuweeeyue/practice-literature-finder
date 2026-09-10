@@ -17,7 +17,8 @@ def get_db_connection():
 def init_db():
     conn = get_db_connection()
     cursor = conn.cursor()
-    # 建立完整的文獻資料表結構
+    
+    # 1. 建立資料表基礎結構（若資料庫不存在時執行）
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS papers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,12 +33,14 @@ def init_db():
         )
     ''')
     
-    # 防禦機制：自動替既有資料庫補充新新增的欄位
-    existing_cols = [row[4] for row in cursor.execute("PRAGMA table_info(papers)").fetchall()]
-    if "journal" not in existing_cols:
-        cursor.execute("ALTER TABLE papers ADD COLUMN journal TEXT")
-    if "pub_date" not in existing_cols:
-        cursor.execute("ALTER TABLE papers ADD COLUMN pub_date TEXT")
+    # 2. 動態檢查並補充欄位（若欄位已存在則忽略錯誤，避免崩潰）
+    new_columns = [("journal", "TEXT"), ("pub_date", "TEXT")]
+    for col_name, col_type in new_columns:
+        try:
+            cursor.execute(f"ALTER TABLE papers ADD COLUMN {col_name} {col_type}")
+        except sqlite3.OperationalError:
+            # 當欄位已存在時，SQLite 會拋出 OperationalError，此處直接跳過
+            pass
         
     conn.commit()
     conn.close()
